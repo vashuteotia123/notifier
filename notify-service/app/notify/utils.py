@@ -25,3 +25,21 @@ def get_uid_from_request(request):
     except (jwt.exceptions.DecodeError, KeyError):
         raise AuthenticationFailed('Invalid token')
     
+
+def validate_notification(notification):
+    required_keys = ["type", "uid", "token_id", "blockchain_deposit_status", 
+                     "brine_deposit_status", "deposit_blockchain_hash", 
+                     "amount", "created_at"]
+    
+    if not all(key in notification for key in required_keys):
+        return False, "Missing required keys"
+    
+    if not all(notification[key] for key in notification):
+        return False, "Missing required values"
+    
+    try:
+        float(notification["amount"])
+    except ValueError:
+        return False, "Invalid amount"
+    
+    return True

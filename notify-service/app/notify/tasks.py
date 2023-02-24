@@ -2,6 +2,10 @@ from celery import shared_task
 from .serializers import DepositNotificationSerializer, ReferralRewardNotificationSerializer
 from .models import DepositNotification, ReferralRewardNotification
 import pika, json, os
+from notify.utils import validate_notification
+import logging 
+
+logger = logging.getLogger(__name__)
 
 @shared_task(name='consume_notifications')
 def consume_notifications():
@@ -29,6 +33,10 @@ def consume_notifications():
 
     def callback(ch, method, properties, body):
         notification = json.loads(body.decode('utf-8'))
+        valid, error = validate_notification(notification)
+        if not valid:
+            logger.error("Invalid notification: {}".format(error))
+            return
         if notification['type'] == 'D':
             push_notification.delay(notification)
             del notification['type']
