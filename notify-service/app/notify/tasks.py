@@ -29,15 +29,15 @@ def consume_notifications():
 
     def callback(ch, method, properties, body):
         notification = json.loads(body.decode('utf-8'))
-        if notification['notification_type'] == 'D':
+        if notification['type'] == 'D':
             push_notification.delay(notification)
-            del notification['notification_type']
+            del notification['type']
             serializer = DepositNotificationSerializer(data=notification)
             if serializer.is_valid():
                 serializer.save()
-        elif notification['notification_type'] == 'R':
+        elif notification['type'] == 'R':
             push_notification.delay(notification)
-            del notification['notification_type']
+            del notification['type']
             serializer = ReferralRewardNotificationSerializer(data=notification)
             if serializer.is_valid():
                 serializer.save()
@@ -54,7 +54,7 @@ def push_notification(notification):
     :param notification: The notification to be pushed
     :return: None
     """
-    routing_key = 'private.{}.{}'.format(notification['uid'], notification['notification_type'])
+    routing_key = 'private.{}.{}'.format(notification['uid'], notification['type'])
     print("Routing Key: {}".format(routing_key))
     user=os.environ.get('RABBITMQ_DEFAULT_USER')
     password=os.environ.get('RABBITMQ_DEFAULT_PASS')
