@@ -33,10 +33,10 @@ def consume_notifications():
 
     def callback(ch, method, properties, body):
         notification = json.loads(body.decode('utf-8'))
-        valid, error = validate_notification(notification)
-        if not valid:
-            logger.error("Invalid notification: {}".format(error))
-            return
+        # valid, error = validate_notification(notification)
+        # if not valid:
+        #     logger.error("Invalid notification: {}".format(error))
+        #     return
         if notification['type'] == 'D':
             push_notification.delay(notification)
             del notification['type']
