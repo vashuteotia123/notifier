@@ -1,5 +1,7 @@
 version: "3.8"
 
+# TODO: production configuration
+
 services:
   web:
     build:
@@ -54,6 +56,7 @@ services:
       - 80:80
     depends_on:
       - web
+      - auth
 
   auth:
     build:
