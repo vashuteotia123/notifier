@@ -1,7 +1,14 @@
+<h3 style="margin:20px">Notifications</h3>
+<button id="logout" class="btn btn-primary" style="margin:20px">Logout</button>
 <div id = "mainBody"></div>
 
 <script>
     var jwt = localStorage.getItem("jwt_token")
+
+    if (!jwt){
+        window.location.href = "/login"
+    }
+else{
 
     fetch("http://localhost:8000/get_user_notifications", {
         method: "GET",
@@ -24,14 +31,6 @@
             alert(json.err)
         }
     })
-
-    var notifications = [{text: "dsd1"}, {text: "dsd2"}, {text: "dsd3"}]
-
-    document.getElementById('mainBody').innerHTML = notifications.map(notification => 
-        `<div class="card" style="margin-bottom: 5px;padding: 10px">
-            <div>Name: ${notification.text}</div>
-        </div>`
-    ).join('')
     
     const exampleSocket = new WebSocket("ws://localhost:9000/public", );
     exampleSocket.onopen = (event) => {
@@ -57,5 +56,13 @@
             
         }
     }
+
+    function logout(){
+        localStorage.removeItem("jwt_token")
+        window.location.href = "/login"
+    }
+
+    document.getElementById('logout').addEventListener('click', logout)
+}
 </script>
 
