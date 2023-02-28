@@ -62,8 +62,8 @@ def push_notification(notification):
     :param notification: The notification to be pushed
     :return: None
     """
-    routing_key = 'private.{}.{}'.format(notification['uid'], notification['type'])
-    print("Routing Key: {}".format(routing_key))
+    # routing_key = 'private.{}.{}'.format(notification['uid'], notification['type'])
+    routing_key = 'public.test.{}'.format(notification['type'])
     user=os.environ.get('RABBITMQ_DEFAULT_USER')
     password=os.environ.get('RABBITMQ_DEFAULT_PASS')
     exchange_name = os.environ.get('RANGO_EXCHANGE_NAME')

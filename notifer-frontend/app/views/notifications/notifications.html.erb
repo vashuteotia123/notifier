@@ -3,23 +3,28 @@
 <script>
     var jwt = localStorage.getItem("jwt_token")
 
-    // fetch("http://localhost:3000/auth/login", {
-    //     method: "GET",
-    //     headers: {'Content-Type': 'application/json', 'Accept': 'application/json', 'Authorization': `Bearer ${jwt}`}, 
-    // }).then(res => {
-    //     return res.json()
-    // }).then(json => {
-    //     var notifications = [{text: "dsd1"}, {text: "dsd2"}, {text: "dsd3"}]
-    //     if("msg" in json){
-    //         document.getElementById('mainBody').innerHTML = notifications.map(notification => 
-    //             `<div class="card-body">
-    //                 <div>Name: ${notification.text}</div>
-    //             </div>`
-    //         ).join('')             
-    //     } else {
-    //         alert(json.err)
-    //     }
-    // })
+    fetch("http://localhost:8000/get_user_notifications", {
+        method: "GET",
+        headers: {'Content-Type': 'application/json', 'Accept': 'application/json', 'Authorization': `Bearer ${jwt}`}, 
+    }).then(res => {
+        return res.json()
+    }).then(json => {
+       console.log(json)
+        var notifications = json.notifications
+        if(notifications){
+            console.log(notifications)
+            document.getElementById('mainBody').innerHTML = notifications.map(notification => 
+                `<div class="card-body">
+                    <div class="card" style="margin-bottom: 5px;padding: 10px">
+                        <div>Amount: ${notification.amount}</div>
+                        <div>Brine Status: ${notification.brine_deposit_status}</div>
+                        </div>
+                </div>`
+            ).join('')             
+        } else {
+            alert(json.err)
+        }
+    })
 
     var notifications = [{text: "dsd1"}, {text: "dsd2"}, {text: "dsd3"}]
 
@@ -33,7 +38,7 @@
     exampleSocket.onopen = (event) => {
         exampleSocket.send(JSON.stringify({
             "event": "subscribe",
-            "streams":["test.d"]
+            "streams":["test.D"]
         }));
     };
 
@@ -41,11 +46,14 @@
         data = JSON.parse(event.data)
         console.log(data)
         if (!data.success){
-        
+            var notification = data['test.D']
             var div = document.createElement('div');
-            div.innerHTML = `<div class="card" style="margin-bottom: 5px;padding: 10px">
-                <div>Name: ${data["test.d"].msg}</div>
-                </div>`
+            div.innerHTML = `<div class="card-body">
+            <div class="card" style="margin-bottom: 5px;padding: 10px">
+                <div>Amount: ${notification.amount}</div>
+                <div>Brine Status: ${notification.brine_deposit_status}</div>
+                </div>
+        </div>`
 
             document.getElementById('mainBody').appendChild(div)
             
