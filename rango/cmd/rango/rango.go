@@ -121,7 +121,7 @@ func getServerAddress() string {
 		return *wsAddr
 	}
 	host := getEnv("RANGER_HOST", "0.0.0.0")
-	port := getEnv("RANGER_PORT", "8080")
+	port := getEnv("RANGER_PORT", "9000")
 	return fmt.Sprintf("%s:%s", host, port)
 }
 

@@ -1,0 +1,68 @@
+<h3 style="margin:20px">Notifications</h3>
+<button id="logout" class="btn btn-primary" style="margin:20px">Logout</button>
+<div id = "mainBody"></div>
+
+<script>
+    var jwt = localStorage.getItem("jwt_token")
+
+    if (!jwt){
+        window.location.href = "/login"
+    }
+else{
+
+    fetch("http://localhost:8000/get_user_notifications", {
+        method: "GET",
+        headers: {'Content-Type': 'application/json', 'Accept': 'application/json', 'Authorization': `Bearer ${jwt}`}, 
+    }).then(res => {
+        return res.json()
+    }).then(json => {
+       console.log(json)
+        var notifications = json.notifications
+        if(notifications){
+            console.log(notifications)
+            document.getElementById('mainBody').innerHTML = notifications.map(notification => 
+                `<div class="card-body">
+                    <div class="card" style="margin-bottom: 5px;padding: 10px">
+                    <div> Hey, your brine deposit of <strong>${notification.amount}</strong> is <strong>${notification.brine_deposit_status}</strong></div>
+                    </div>
+                </div>`
+            ).join('')             
+        } else {
+            alert(json.err)
+        }
+    })
+    
+    const exampleSocket = new WebSocket("ws://localhost:9000/public", );
+    exampleSocket.onopen = (event) => {
+        exampleSocket.send(JSON.stringify({
+            "event": "subscribe",
+            "streams":["test.D"]
+        }));
+    };
+
+    exampleSocket.onmessage = (event) => {
+        data = JSON.parse(event.data)
+        console.log(data)
+        if (!data.success){
+            var notification = data['test.D']
+            var div = document.createElement('div');
+            div.innerHTML = `<div class="card-body">
+            <div class="card" style="margin-bottom: 5px;padding: 10px">
+                <div> Hey, your brine deposit of <strong>${notification.amount}</strong> is <strong>${notification.brine_deposit_status}</strong></div>
+                </div>
+        </div>`
+
+            document.getElementById('mainBody').appendChild(div)
+            
+        }
+    }
+
+    function logout(){
+        localStorage.removeItem("jwt_token")
+        window.location.href = "/login"
+    }
+
+    document.getElementById('logout').addEventListener('click', logout)
+}
+</script>
+

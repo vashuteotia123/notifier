@@ -27,7 +27,7 @@ def consume_notifications():
     credentials = pika.PlainCredentials(user, password)
     connection = pika.BlockingConnection(pika.ConnectionParameters(host=host, port=port, credentials=credentials))
     channel = connection.channel()
-    channel.exchange_declare(exchange=exchange_name, exchange_type='direct')
+    channel.exchange_declare(exchange=exchange_name, exchange_type='topic')
     channel.queue_declare(queue=queue_name)
     channel.queue_bind(exchange=exchange_name, queue=queue_name, routing_key=routing_key)
 
@@ -38,13 +38,11 @@ def consume_notifications():
         #     logger.error("Invalid notification: {}".format(error))
         #     return
         if notification['type'] == 'D':
-            push_notification.delay(notification)
             del notification['type']
             serializer = DepositNotificationSerializer(data=notification)
             if serializer.is_valid():
                 serializer.save()
         elif notification['type'] == 'R':
-            push_notification.delay(notification)
             del notification['type']
             serializer = ReferralRewardNotificationSerializer(data=notification)
             if serializer.is_valid():
@@ -53,24 +51,3 @@ def consume_notifications():
     channel.basic_consume(queue=queue_name, on_message_callback=callback, auto_ack=True)
     channel.start_consuming()
 
-
-@shared_task
-def push_notification(notification):
-    """
-    Pushes a notification to the notification queue
-    
-    :param notification: The notification to be pushed
-    :return: None
-    """
-    routing_key = 'private.{}.{}'.format(notification['uid'], notification['type'])
-    print("Routing Key: {}".format(routing_key))
-    user=os.environ.get('RABBITMQ_DEFAULT_USER')
-    password=os.environ.get('RABBITMQ_DEFAULT_PASS')
-    exchange_name = os.environ.get('RANGO_EXCHANGE_NAME')
-
-    credentials = pika.PlainCredentials(user, password)
-    connection = pika.BlockingConnection(pika.ConnectionParameters(host='rabbitmq', port=5672, credentials=credentials))
-    channel = connection.channel()
-    channel.exchange_declare(exchange=exchange_name, exchange_type='topic')
-    channel.basic_publish(exchange=exchange_name, routing_key=routing_key, body=json.dumps(notification))
-    connection.close()
