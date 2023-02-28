@@ -1,0 +1,55 @@
+<div id = "mainBody"></div>
+
+<script>
+    var jwt = localStorage.getItem("jwt_token")
+
+    // fetch("http://localhost:3000/auth/login", {
+    //     method: "GET",
+    //     headers: {'Content-Type': 'application/json', 'Accept': 'application/json', 'Authorization': `Bearer ${jwt}`}, 
+    // }).then(res => {
+    //     return res.json()
+    // }).then(json => {
+    //     var notifications = [{text: "dsd1"}, {text: "dsd2"}, {text: "dsd3"}]
+    //     if("msg" in json){
+    //         document.getElementById('mainBody').innerHTML = notifications.map(notification => 
+    //             `<div class="card-body">
+    //                 <div>Name: ${notification.text}</div>
+    //             </div>`
+    //         ).join('')             
+    //     } else {
+    //         alert(json.err)
+    //     }
+    // })
+
+    var notifications = [{text: "dsd1"}, {text: "dsd2"}, {text: "dsd3"}]
+
+    document.getElementById('mainBody').innerHTML = notifications.map(notification => 
+        `<div class="card" style="margin-bottom: 5px;padding: 10px">
+            <div>Name: ${notification.text}</div>
+        </div>`
+    ).join('')
+    
+    const exampleSocket = new WebSocket("ws://localhost:9000/public", );
+    exampleSocket.onopen = (event) => {
+        exampleSocket.send(JSON.stringify({
+            "event": "subscribe",
+            "streams":["test.d"]
+        }));
+    };
+
+    exampleSocket.onmessage = (event) => {
+        data = JSON.parse(event.data)
+        console.log(data)
+        if (!data.success){
+        
+            var div = document.createElement('div');
+            div.innerHTML = `<div class="card" style="margin-bottom: 5px;padding: 10px">
+                <div>Name: ${data["test.d"].msg}</div>
+                </div>`
+
+            document.getElementById('mainBody').appendChild(div)
+            
+        }
+    }
+</script>
+
